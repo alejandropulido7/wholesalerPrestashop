@@ -26,7 +26,14 @@
 <h3>{$reglaMayorista}</h3>
 <h4>{$textoAEnviar}</h4>
 
-<span>Oelo</span>
+{foreach from=$grupo item=id}
+	id: {$id.id_group}<br />
+{/foreach}
+
+Maximo:
+{$idMax}
+
+{* <span>Oelo</span>
 <span id="mostrarSubtotalCarrito"></span>
 {if $cart.minimalPurchaseRequired}
 	<div class="checkout cart-detailed-actions-custom">
@@ -43,4 +50,4 @@
 	  <a href="{$urls.pages.order}" class="btn btn-primary">{l s='Proceed to checkout' d='Shop.Theme.Actions'}</a>
 	  {hook h='displayExpressCheckout'}
 	</div>
-{/if}
+{/if} *}
