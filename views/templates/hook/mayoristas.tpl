@@ -23,8 +23,10 @@
 *  International Registered Trademark & Property of PrestaShop SA
 *}
 
+Regla:
 <h3>{$reglaMayorista}</h3>
-<h4>{$textoAEnviar}</h4>
+Carrito:
+<h4>{$carrito}</h4>
 
 {foreach from=$grupo item=id}
 	id: {$id.id_group}<br />
@@ -32,6 +34,9 @@
 
 Maximo:
 {$idMax}
+
+precio total:
+{$idOrder}
 
 {* <span>Oelo</span>
 <span id="mostrarSubtotalCarrito"></span>

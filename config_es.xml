@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<module>
+    <name>wholesalermodule</name>
+    <displayName><![CDATA[Modulo Mayoristas]]></displayName>
+    <version><![CDATA[1.0.0]]></version>
+    <description><![CDATA[Gestion de mayoristas]]></description>
+    <author><![CDATA[Coding Proactive]]></author>
+    <tab><![CDATA[checkout]]></tab>
+    <is_configurable>1</is_configurable>
+    <need_instance>0</need_instance>
+	<limited_countries></limited_countries>
+</module>

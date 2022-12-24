@@ -24,14 +24,17 @@
 *  International Registered Trademark & Property of PrestaShop SA
 */
 
+use GuzzleHttp\Url;
+use Invertus\Faire\Core\Order\DTO\Internal\OrderShipping;
 use PhpParser\Node\Expr\Cast\Double;
 use PrestaShop\PrestaShop\Adapter\Presenter\Cart\CartPresenter;
+use PrestaShop\PrestaShop\Core\Module\WidgetInterface;
 
 if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-class WholesalerModule extends Module
+class WholesalerModule extends Module implements WidgetInterface
 {
     protected $config_form = false;
 
@@ -64,9 +67,9 @@ class WholesalerModule extends Module
     {
         Configuration::updateValue('WHOLESALERMODULE_MINIMUM_PURCHASE', 0);
 
-        return parent::install() 
-                && $this->registerHook('displayShoppingCart') 
-                && $this->registerHook('displayMinimalPurchase')
+        return parent::install()
+                && $this->registerHook('displayExpressCheckout') 
+                && $this->registerHook('displayMinimalPurchase') 
                 && $this->registerHook('actionFrontControllerSetMedia')
                 && $this->installBD();
     }
@@ -238,14 +241,15 @@ class WholesalerModule extends Module
         
     }
 
-    public function hookDisplayShoppingCart()
+    public function hookDisplayExpressCheckout()
     {
+        $lang = $this->context->language->id;
         $idCart = $this->context->cookie->id_cart;
-        $idOrder = $this->context->cookie->id_order;
+        $idOrder = $this->context->cart->getCartTotalPrice();
         $url = _THEME_DIR_ . 'templates/checkout/_partials/cart-detailed-actions.tpl';
-        $carrito = Cart::getTotalCart($idCart);
+        $carrito = $this->context->cart->getTotalCart($idCart);
         $regla = (Double)Configuration::get('WHOLESALERMODULE_MINIMUM_PURCHASE');
-
+        // Hook::exec('actionCartSummary',)
         $grupo = Group::getGroups(1);
         $grupoCreado = false;
         $name = Group::searchByName('Cliente');
@@ -260,10 +264,11 @@ class WholesalerModule extends Module
         }
 
         $this->context->smarty->assign([
-            'textoAEnviar' => $carrito,
+            'carrito' => $carrito,
             'reglaMayorista' => $regla,
             'grupo' => $grupo,
             'idMax' => $idMax,
+            'idOrder' => $idOrder,
         ]);
         //return $this->context->smarty->fetch($this->local_path.'views/templates/admin/mayoristas.tpl');
         return $this->display(__FILE__, 'mayoristas.tpl');
@@ -284,5 +289,104 @@ class WholesalerModule extends Module
             'frontwholesaler-js',
             'modules/' . $this->name . '/views/js/front.js'
         );
+    }
+
+    public function renderWidget($hookName = null, array $params)
+    {
+        if (!$this->active) {
+            return;
+        }
+
+        $this->smarty->assign($this->getWidgetVariables($hookName, $params));
+        
+        return $this->display(__FILE__, 'formWholesaler.tpl');
+        // return $this->context->smarty->fetch($this->local_path.'views/templates/hook/formWholesaler.tpl');
+    }
+
+    protected function createNewToken()
+    {
+        $this->context->cookie->contactFormToken = md5(uniqid());
+        $this->context->cookie->contactFormTokenTTL = time()+600;
+
+        return $this;
+    }
+
+
+    public function getWidgetVariables($hookName = null, array $params){
+
+        $messageWhole = null;
+        $emailShop = null;
+        $from = null;
+        $rutaTemplate = _PS_MAIL_DIR_;
+
+        if (Tools::isSubmit('submitWholesaler')) {
+            $messageWhole = Tools::getValue('message');
+            $from = Tools::getValue('from');
+            $emailShop = Configuration::get('PS_SHOP_EMAIL');
+            
+
+            $var_list = [
+                '{firstname}' => '',
+                '{lastname}' => '',
+                '{order_name}' => '-',
+                '{attached_file}' => '-',
+                '{message}' => Tools::nl2br(Tools::htmlentitiesUTF8(Tools::stripslashes($messageWhole))),
+                '{email}' =>  $from,
+                '{product_name}' => '',
+            ];
+
+            // if (!Mail::Send(
+            //     $this->context->language->id,
+            //     'contact',
+            //     $this->trans('Your message has been correctly sent', [], 'Emails.Subject'),
+            //     $var_list,
+            //     $from,
+            //     null,
+            //     null,
+            //     null,
+            //     null,
+            //     null,
+            //     _PS_MAIL_DIR_,
+            //     false,
+            //     null,
+            //     null,
+            //     $emailShop
+            // )) {
+            //     $this->context->controller->errors[] = $this->trans(
+            //         'An error occurred while sending the message.',
+            //         [],
+            //         'Modules.Contactform.Shop'
+            //     );
+            // };
+
+            if (!Mail::sendMailTest(
+                1,
+                Configuration::get('PS_MAIL_SERVER'),
+                $messageWhole,
+                'Solicitud de registro Mayorista',
+                Configuration::get('PS_MAIL_TYPE'),
+                Configuration::get('PS_SHOP_EMAIL'),
+                $from,
+                Configuration::get('PS_MAIL_USER'),
+                Configuration::get('PS_MAIL_PASSWD'),
+                Configuration::get('PS_MAIL_SMTP_PORT'),
+                Configuration::get('PS_MAIL_SMTP_ENCRYPTION')
+            )) {
+                $this->context->controller->errors[] = $this->trans(
+                    'An error occurred while sending the message.',
+                    [],
+                    'Modules.Contactform.Shop'
+                );
+            };
+
+        }
+
+        return array(
+			'token' => $this->context->cookie->contactFormToken,
+            'messageWhole' => $messageWhole,
+            'fromWhole' => $from,
+            'from'=> $emailShop,
+            'rutaTemplate' => $rutaTemplate,
+		);
     }
 }
