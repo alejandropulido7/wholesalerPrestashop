@@ -24,10 +24,6 @@
 *  International Registered Trademark & Property of PrestaShop SA
 */
 
-use GuzzleHttp\Url;
-use Invertus\Faire\Core\Order\DTO\Internal\OrderShipping;
-use PhpParser\Node\Expr\Cast\Double;
-use PrestaShop\PrestaShop\Adapter\Presenter\Cart\CartPresenter;
 use PrestaShop\PrestaShop\Core\Module\WidgetInterface;
 
 if (!defined('_PS_VERSION_')) {
@@ -244,35 +240,38 @@ class WholesalerModule extends Module implements WidgetInterface
     public function hookDisplayExpressCheckout()
     {
         $lang = $this->context->language->id;
-        $idCart = $this->context->cookie->id_cart;
-        $idOrder = $this->context->cart->getCartTotalPrice();
-        $url = _THEME_DIR_ . 'templates/checkout/_partials/cart-detailed-actions.tpl';
-        $carrito = $this->context->cart->getTotalCart($idCart);
-        $regla = (Double)Configuration::get('WHOLESALERMODULE_MINIMUM_PURCHASE');
-        // Hook::exec('actionCartSummary',)
-        $grupo = Group::getGroups(1);
-        $grupoCreado = false;
-        $name = Group::searchByName('Cliente');
+        $cartTotalPrice = $this->context->cart->getCartTotalPrice();
+        $minimumPurchase = (Double)Configuration::get('WHOLESALERMODULE_MINIMUM_PURCHASE');
+        // $group = $this->context->customer->getGroupsStatic($this->context->customer->id);
+        // $custumer = $group['id_group'];
 
-        $idMax = 0;
+        $group = Group::searchByName('Mayorista');
+        $currentGroup = Customer::getDefaultGroupId($this->context->customer->id);
+        // $isWholesaler = $group['id_group'] == $currentGroup['id_default_group'] ? 'true' : 'false';
 
-        $grupo = Group::getGroups(1);
-        foreach ($grupo as $value) {
-            if($idMax < $value['id_group']){
-                $idMax = $value['id_group'];
-            }
-        }
+        $custumer = $this->defaultGroupCustomer($this->context->customer->id);
+
+        echo $group['id_group'];
+        echo $this->context->customer->id;
+        echo $this->context->customer->firstname;
 
         $this->context->smarty->assign([
-            'carrito' => $carrito,
-            'reglaMayorista' => $regla,
-            'grupo' => $grupo,
-            'idMax' => $idMax,
-            'idOrder' => $idOrder,
+            'minimumPurchase' => $minimumPurchase,
+            'cartTotalPrice' => $cartTotalPrice,
+            // 'isWholesaler' => $isWholesaler,
+            'custumer' => $custumer,
         ]);
-        //return $this->context->smarty->fetch($this->local_path.'views/templates/admin/mayoristas.tpl');
         return $this->display(__FILE__, 'mayoristas.tpl');
-        // return $this->context->smarty->fetch($url);
+    }
+
+    public function defaultGroupCustomer($idCustomer){
+
+        $idDefaultGroup = Db::getInstance()->getValue(
+            'SELECT `id_default_group` FROM `' . _DB_PREFIX_ . 'customer`
+                WHERE `id_customer` = ' . (int) $idCustomer
+        );
+
+        return $idDefaultGroup == null ? 0 : $idDefaultGroup;
     }
 
     public function hookDisplayMinimalPurchase()

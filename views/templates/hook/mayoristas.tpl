@@ -23,20 +23,20 @@
 *  International Registered Trademark & Property of PrestaShop SA
 *}
 
-Regla:
-<h3>{$reglaMayorista}</h3>
-Carrito:
-<h4>{$carrito}</h4>
+minimumPurchase:
+<h3>{$minimumPurchase}</h3>
+cartTotalPrice:
+<h4>{$cartTotalPrice}</h4>
+custumer:
+<h4>{$custumer}</h4>
 
-{foreach from=$grupo item=id}
+group:
+{* <h4>{$isWholesaler}</h4> *}
+
+{* {foreach from=$costumer item=id}
 	id: {$id.id_group}<br />
-{/foreach}
+{/foreach} *}
 
-Maximo:
-{$idMax}
-
-precio total:
-{$idOrder}
 
 {* <span>Oelo</span>
 <span id="mostrarSubtotalCarrito"></span>
