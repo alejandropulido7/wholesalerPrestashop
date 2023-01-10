@@ -22,37 +22,47 @@
 *  @license   http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
 *  International Registered Trademark & Property of PrestaShop SA
 *}
-
 minimumPurchase:
-<h3>{$minimumPurchase}</h3>
+<input id="minimumPurchase" type="text" value="{$minimumPurchase}" disabled>
+<br>
 cartTotalPrice:
-<h4>{$cartTotalPrice}</h4>
+<input id="cartTotalPrice" type="number" inputmode="numeric" value="{$cartTotalPrice}">
+<br>
 custumer:
-<h4>{$custumer}</h4>
-
+<input id="currentGroup" type="text" value="{$currentGroup}" disabled>
+<br>
 group:
-{* <h4>{$isWholesaler}</h4> *}
+<input id="idWholesaler" type="text" value="{$idWholesaler}" disabled>
+Mensaje:
+<div id="message">{$isOk}</div>
+isWholesaler:
+<input id="isWholesaler" type="number" value="{$isWholesaler}">
 
-{* {foreach from=$costumer item=id}
-	id: {$id.id_group}<br />
-{/foreach} *}
 
 
-{* <span>Oelo</span>
-<span id="mostrarSubtotalCarrito"></span>
-{if $cart.minimalPurchaseRequired}
-	<div class="checkout cart-detailed-actions-custom">
-		<div class="alert alert-warning" role="alert">
-			{hook h='displayMinimalPurchase'}
-		</div>
+<span id="subtotalCustom"></span>
+{if $isWholesaler}
+	{if !$isOk}
+		<div class="checkout cart-detailed-actions-custom">
+			<div class="alert alert-warning" role="alert">
+				{$message}
+			</div>
+		<div>
+	{else}
 		<div class="text-sm-center">
-			<button type="button" class="btn btn-primary disabled"
-				disabled>{l s='Proceed to checkout' d='Shop.Theme.Actions'}</button>
+		<a href="{$urls.pages.order}" class="btn btn-primary">{l s='Proceed to checkout' d='Shop.Theme.Actions'}</a>
 		</div>
-	<div>
-{else}
-	<div class="text-sm-center">
-	  <a href="{$urls.pages.order}" class="btn btn-primary">{l s='Proceed to checkout' d='Shop.Theme.Actions'}</a>
-	  {hook h='displayExpressCheckout'}
-	</div>
-{/if} *}
+	{/if}
+{/if}
+
+<script type="text/javascript">
+
+alert("isWholesaler");
+
+const isWholesaler = $("#isWholesaler").val() == 1 ? true : false;
+    alert(isWholesaler);
+    if(isWholesaler){
+        $(".card-block.checkout .btn-primary").css("display","none");
+    } 
+	
+</script>

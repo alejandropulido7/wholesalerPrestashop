@@ -64,8 +64,7 @@ class WholesalerModule extends Module implements WidgetInterface
         Configuration::updateValue('WHOLESALERMODULE_MINIMUM_PURCHASE', 0);
 
         return parent::install()
-                && $this->registerHook('displayExpressCheckout') 
-                && $this->registerHook('displayMinimalPurchase') 
+                && $this->registerHook('displayCheckoutSubtotalDetails') 
                 && $this->registerHook('actionFrontControllerSetMedia')
                 && $this->installBD();
     }
@@ -204,7 +203,7 @@ class WholesalerModule extends Module implements WidgetInterface
             $sql[1] = 'INSERT INTO `'. _DB_PREFIX_ .'group_lang` (`id_group`, `id_lang`, `name`) VALUES ('.$idMax.', 1, "Mayorista");';
             $sql[2] = 'INSERT INTO `'. _DB_PREFIX_ .'group_lang` (`id_group`, `id_lang`, `name`) VALUES ('.$idMax.', 2, "Mayorista");';
             $sql[3] = 'INSERT INTO `'. _DB_PREFIX_ .'group_shop` (`id_group`, `id_shop`) VALUES ('.$idMax.', 1);';
-            $sql[4] = 'INSERT INTO `'. _DB_PREFIX_ .'group` (`id_group`, `reduction`, `price_display_method`, `show_prices`, `date_add`, `date_upd`) VALUES ('.$idMax.', "0", "0", "0", sysdate(), sysdate());';
+            $sql[4] = 'INSERT INTO `'. _DB_PREFIX_ .'group` (`id_group`, `reduction`, `price_display_method`, `show_prices`, `date_add`, `date_upd`) VALUES ('.$idMax.', "0", "0", "1", sysdate(), sysdate());';
         }        
         foreach ($sql as $query) {
             if (Db::getInstance()->execute($query) == false) {
@@ -237,49 +236,29 @@ class WholesalerModule extends Module implements WidgetInterface
         
     }
 
-    public function hookDisplayExpressCheckout()
+    public function hookDisplayCheckoutSubtotalDetails()
     {
         $lang = $this->context->language->id;
         $cartTotalPrice = $this->context->cart->getCartTotalPrice();
-        $minimumPurchase = (Double)Configuration::get('WHOLESALERMODULE_MINIMUM_PURCHASE');
-        // $group = $this->context->customer->getGroupsStatic($this->context->customer->id);
-        // $custumer = $group['id_group'];
-
+        $minimumPurchase = (Double)Configuration::get('WHOLESALERMODULE_MINIMUM_PURCHASE');  
         $group = Group::searchByName('Mayorista');
-        $currentGroup = Customer::getDefaultGroupId($this->context->customer->id);
-        // $isWholesaler = $group['id_group'] == $currentGroup['id_default_group'] ? 'true' : 'false';
+        $currentGroup = Customer::getDefaultGroupId($this->context->customer->id) ?? 0;
 
-        $custumer = $this->defaultGroupCustomer($this->context->customer->id);
+        $isOk = $cartTotalPrice >= $minimumPurchase ? true : false;
+        $isWholesaler = (bool) $group['id_group'] == $currentGroup ? 1 : 0;
+        $message = 'A minimum shopping cart total of '.$minimumPurchase.' (tax excl.) is required to validate your order. Current cart total is '.$cartTotalPrice.' (tax excl.)';
 
-        echo $group['id_group'];
-        echo $this->context->customer->id;
-        echo $this->context->customer->firstname;
 
         $this->context->smarty->assign([
             'minimumPurchase' => $minimumPurchase,
             'cartTotalPrice' => $cartTotalPrice,
-            // 'isWholesaler' => $isWholesaler,
-            'custumer' => $custumer,
+            'idWholesaler' => $group['id_group'],
+            'currentGroup' => $currentGroup,
+            'isOk' => $isOk,
+            'isWholesaler' => $isWholesaler,
+            'message' => $message
         ]);
         return $this->display(__FILE__, 'mayoristas.tpl');
-    }
-
-    public function defaultGroupCustomer($idCustomer){
-
-        $idDefaultGroup = Db::getInstance()->getValue(
-            'SELECT `id_default_group` FROM `' . _DB_PREFIX_ . 'customer`
-                WHERE `id_customer` = ' . (int) $idCustomer
-        );
-
-        return $idDefaultGroup == null ? 0 : $idDefaultGroup;
-    }
-
-    public function hookDisplayMinimalPurchase()
-    {
-        $minimalPurchase = (Double)Configuration::get('WHOLESALERMODULE_MINIMUM_PURCHASE');
-        $productsTotalExcludingTax = $this->context->cart->getCartTotalPrice();
-        echo 'A minimum shopping cart total of '.$minimalPurchase.' (tax excl.) is required to validate your order. Current cart total is '.$productsTotalExcludingTax.' (tax excl.).';
-        
     }
 
     public function hookActionFrontControllerSetMedia()

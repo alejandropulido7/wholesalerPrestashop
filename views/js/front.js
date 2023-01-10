@@ -25,10 +25,18 @@
 * Don't forget to prefix your containers with your own identifier
 * to avoid any conflicts with others containers.
 */
-// $(document).ready(function(){
-//     getSubtotals();
-// })
 
-// function getSubtotals(){
-//     $(".checkout.cart-detailed-actions").hide();
-// }
+
+// $(document).ready(function(){
+//     const isWholesaler = $("#isWholesaler").val() == 1 ? true : false;
+//     alert(isWholesaler);
+//     if(isWholesaler){
+//         $(".checkout.cart-detailed-actions").css("display","none");
+//     }   
+// });
+
+// const isWholesaler = $("#isWholesaler").val() == 1 ? true : false;
+//     alert(isWholesaler);
+//     if(isWholesaler){
+//         $(".card-block.checkout .btn-primary").css("display","none");
+//     } 
