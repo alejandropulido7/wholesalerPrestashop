@@ -25,6 +25,7 @@
 */
 
 use PrestaShop\PrestaShop\Core\Module\WidgetInterface;
+use PrestaShop\PrestaShop\Adapter\Product\PriceFormatter;
 
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -49,7 +50,7 @@ class WholesalerModule extends Module implements WidgetInterface
 
         parent::__construct();
 
-        $this->displayName = $this->l('Modulo Mayoristas');
+        $this->displayName = $this->l('Wholesaler Module');
         $this->description = $this->l('Gestion de mayoristas');
 
         $this->ps_versions_compliancy = array('min' => '1.6', 'max' => _PS_VERSION_);
@@ -64,7 +65,9 @@ class WholesalerModule extends Module implements WidgetInterface
         Configuration::updateValue('WHOLESALERMODULE_MINIMUM_PURCHASE', 0);
 
         return parent::install()
-                && $this->registerHook('displayCheckoutSubtotalDetails') 
+                && $this->registerHook('displayShoppingCart') 
+                && $this->registerHook('overrideMinimalPurchasePrice') 
+                && $this->registerHook('actionPresentCart')
                 && $this->registerHook('actionFrontControllerSetMedia')
                 && $this->installBD();
     }
@@ -221,10 +224,13 @@ class WholesalerModule extends Module implements WidgetInterface
         $group = Group::searchByName('Mayorista');
         $idGroup = $group['id_group'];
         if($idGroup != null || $idGroup != 0){
-            $sql[1] = 'DELETE `'. _DB_PREFIX_ .'group_lang` WHERE `id_group` = '.$idGroup.';';
-            $sql[2] = 'DELETE `'. _DB_PREFIX_ .'group_shop` WHERE `id_group` = '.$idGroup.';';
-            $sql[3] = 'DELETE `'. _DB_PREFIX_ .'group` WHERE `id_group` = '.$idGroup.';';
+            $sqlUnistall[1] = 'DELETE FROM `'. _DB_PREFIX_ .'group_lang` WHERE `id_group` = '.(int)$idGroup.';';
+            $sqlUnistall[2] = 'DELETE FROM `'. _DB_PREFIX_ .'group_shop` WHERE `id_group` = '.(int)$idGroup.';';
+            $sqlUnistall[3] = 'DELETE FROM `'. _DB_PREFIX_ .'group` WHERE `id_group` = '.(int)$idGroup.';';
+            $sqlUnistall[4] = 'DELETE FROM `'. _DB_PREFIX_ .'customer_group` WHERE `id_group` = '.(int)$idGroup.';';
+            $sqlUnistall[5] = 'UPDATE `'. _DB_PREFIX_ .'customer` SET id_default_group = 3 WHERE `id_default_group` = '.(int)$idGroup.';';
         }
+        
 
         foreach ($sqlUnistall as $query) {
             if (Db::getInstance()->execute($query) == false) {
@@ -236,37 +242,47 @@ class WholesalerModule extends Module implements WidgetInterface
         
     }
 
-    public function hookDisplayCheckoutSubtotalDetails()
-    {
-        $lang = $this->context->language->id;
-        $cartTotalPrice = $this->context->cart->getCartTotalPrice();
-        $minimumPurchase = (Double)Configuration::get('WHOLESALERMODULE_MINIMUM_PURCHASE');  
+    public function hookOverrideMinimalPurchasePrice($params){
+        $priceFormatter = new PriceFormatter();
+        $minimalPurchase = $priceFormatter->convertAmount((float) Configuration::get('WHOLESALERMODULE_MINIMUM_PURCHASE'));
         $group = Group::searchByName('Mayorista');
-        $currentGroup = Customer::getDefaultGroupId($this->context->customer->id) ?? 0;
-
-        $isOk = $cartTotalPrice >= $minimumPurchase ? true : false;
-        $isWholesaler = (bool) $group['id_group'] == $currentGroup ? 1 : 0;
-        $message = 'A minimum shopping cart total of '.$minimumPurchase.' (tax excl.) is required to validate your order. Current cart total is '.$cartTotalPrice.' (tax excl.)';
-
-
-        $this->context->smarty->assign([
-            'minimumPurchase' => $minimumPurchase,
-            'cartTotalPrice' => $cartTotalPrice,
-            'idWholesaler' => $group['id_group'],
-            'currentGroup' => $currentGroup,
-            'isOk' => $isOk,
-            'isWholesaler' => $isWholesaler,
-            'message' => $message
-        ]);
-        return $this->display(__FILE__, 'mayoristas.tpl');
+        $defaultGroup = Customer::getDefaultGroupId($this->context->customer->id) ?? 0;
+        
+        if($defaultGroup == $group['id_group']){
+            $params['minimalPurchase'] = $minimalPurchase;
+        }
+        
     }
 
-    public function hookActionFrontControllerSetMedia()
+    public function hookActionPresentCart($params){        
+        $minimalPurchase = $params['presentedCart']['minimalPurchase'];
+        $priceFormatter = new PriceFormatter();
+        $productsTotalExcludingTax = $this->context->cart->getOrderTotal(false);
+        $lang = Language::getLanguage($this->context->language->id);
+        $message = '';
+        
+        if($lang['language_code'] == 'en'){
+            $message = $this->l('Wholesaler: A minimum shopping cart total of '.$priceFormatter->format($minimalPurchase).' (tax excl.) is required to validate your order. Current cart total is '.$priceFormatter->format($productsTotalExcludingTax).' (tax excl.).');
+        }else if($lang['language_code'] == 'es'){
+            $message = $this->l('Mayorista: Se necesita una compra mínima total de '.$priceFormatter->format($minimalPurchase).' (impuestos exc.) para validar su pedido. En este momento el valor total de su carrito es de '.$priceFormatter->format($productsTotalExcludingTax).' (impuestos exc.).');
+        }
+
+        if($productsTotalExcludingTax < $minimalPurchase){
+            $params['presentedCart']['minimalPurchaseRequired'] = $message;
+        }
+
+    }
+
+    public function hookDisplayShoppingCart()
     {
-        $this->context->controller->registerJavascript(
-            'frontwholesaler-js',
-            'modules/' . $this->name . '/views/js/front.js'
-        );
+        
+        $message = '';
+        
+        $this->context->smarty->assign([
+            'message' => $message
+        ]);
+        
+        return $this->display(__FILE__, 'mayoristas.tpl');
     }
 
     public function renderWidget($hookName = null, array $params)
@@ -278,7 +294,6 @@ class WholesalerModule extends Module implements WidgetInterface
         $this->smarty->assign($this->getWidgetVariables($hookName, $params));
         
         return $this->display(__FILE__, 'formWholesaler.tpl');
-        // return $this->context->smarty->fetch($this->local_path.'views/templates/hook/formWholesaler.tpl');
     }
 
     protected function createNewToken()

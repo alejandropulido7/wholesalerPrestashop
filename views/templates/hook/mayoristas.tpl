@@ -22,47 +22,9 @@
 *  @license   http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
 *  International Registered Trademark & Property of PrestaShop SA
 *}
-minimumPurchase:
+<h2>OEEEEEEEEEEEEE</h2>
+ minimumPurchase:
 <input id="minimumPurchase" type="text" value="{$minimumPurchase}" disabled>
-<br>
-cartTotalPrice:
-<input id="cartTotalPrice" type="number" inputmode="numeric" value="{$cartTotalPrice}">
-<br>
-custumer:
-<input id="currentGroup" type="text" value="{$currentGroup}" disabled>
-<br>
-group:
-<input id="idWholesaler" type="text" value="{$idWholesaler}" disabled>
+
 Mensaje:
-<div id="message">{$isOk}</div>
-isWholesaler:
-<input id="isWholesaler" type="number" value="{$isWholesaler}">
-
-
-
-<span id="subtotalCustom"></span>
-{if $isWholesaler}
-	{if !$isOk}
-		<div class="checkout cart-detailed-actions-custom">
-			<div class="alert alert-warning" role="alert">
-				{$message}
-			</div>
-		<div>
-	{else}
-		<div class="text-sm-center">
-		<a href="{$urls.pages.order}" class="btn btn-primary">{l s='Proceed to checkout' d='Shop.Theme.Actions'}</a>
-		</div>
-	{/if}
-{/if}
-
-<script type="text/javascript">
-
-alert("isWholesaler");
-
-const isWholesaler = $("#isWholesaler").val() == 1 ? true : false;
-    alert(isWholesaler);
-    if(isWholesaler){
-        $(".card-block.checkout .btn-primary").css("display","none");
-    } 
-	
-</script>
+<div id="message">{$message}</div>
