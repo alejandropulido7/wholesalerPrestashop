@@ -41,48 +41,79 @@
         </div>
 
         <div class="form-fields">
+
             <div class="form-group row">
-                <label class="col-md-3 form-control-label">{l s='Email address' d='Modules.Contactform.Shop'}</label>
+                <label class="col-md-3 form-control-label">{l s='DNI' mod='wholesalermodule'}</label>
                 <div class="col-md-6">
-                    <input class="form-control" type="email" name="from" class="form-control" value=""  
+                    <input class="form-control" type="text" name="dni" class="form-control" value=""  
                     />
                 </div>                    
             </div>
 
             <div class="form-group row">
-                <label class="col-md-3 form-control-label">{l s='Message' d='Modules.Contactform.Shop'}</label>
-                <div class="col-md-6 text-left">
-                    <textarea class="form-control" cols="67" rows="3" name="message">
-                    </textarea>
-                </div>
+                <label class="col-md-3 form-control-label">{l s='Razon social' mod='wholesalermodule'}</label>
+                <div class="col-md-6">
+                    <input class="form-control" type="text" name="razon_social" class="form-control" value=""  
+                    />
+                </div>                    
+            </div>
+
+            <div class="form-group row">
+                <label class="col-md-3 form-control-label">{l s='Tel/Cel' mod='wholesalermodule'}</label>
+                <div class="col-md-6">
+                    <input class="form-control" type="text" name="telefono" class="form-control" value=""  
+                    />
+                </div>                    
+            </div>
+
+            <div class="form-group row">
+                <label class="col-md-3 form-control-label">{l s='Email address' mod='wholesalermodule'}</label>
+                <div class="col-md-6">
+                    <input class="form-control" type="email" name="email" class="form-control" value=""  
+                    />
+                </div>                    
+            </div>
+
+            <div class="form-group row">
+                <label class="col-md-3 form-control-label">{l s='Contact name' mod='wholesalermodule'}</label>
+                <div class="col-md-6">
+                    <input class="form-control" type="email" name="contacto" class="form-control" value=""  
+                    />
+                </div>                    
             </div>
 
             <div class="form-group row" for="file-upload" class="btn btn-primary ">
-                <label>{l s='Attach File' d='Modules.Contactform.Shop'}</label>
-                <input type="file" name="fileUpload" />
+                <label>{l s='Rut' mod='wholesalermodule'}</label>
+                <input type="file" name="rutShop" />
+            </div>
+
+            <div class="form-group row" for="file-upload" class="btn btn-primary ">
+                <label>{l s='Camara de comercio' mod='wholesalermodule'}</label>
+                <input type="file" name="commerceShop" />
             </div>
 
             <div class="form-footer">
                 <input type="hidden" name="token" value="{$token|escape:'htmlall':'UTF-8'}" />
                 <button type="submit" name="submitWholesaler" class="btn btn-primary">
-                    {l s='Send' d='Modules.Contactform.Shop'}
+                    {l s='Send' mod='wholesalermodule'}
                 </button>
             </div>
 
         </div>
     </form>
+    {if isset($response)}
+        <span>{$response}</span>
+    {/if}
 </section>
 
-<div>Correo</div>
-{if isset($fromWhole)}
-<div>{$fromWhole}</div>
-{/if}
-<div>Mensaje</div>
-{if isset($messageWhole)}
-<div>{$messageWhole}</div>
+
+<br>
+RUT:
+{if isset($archivo)}
+<div>{$archivo}</div>
 {/if}
 
-{$rutaTemplate}
-
-SQL:
-{$sql}
+CAMARA:
+{if isset($camara)}
+<div>{$camara}</div>
+{/if}

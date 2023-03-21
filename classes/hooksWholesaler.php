@@ -2,7 +2,7 @@
 
 use PrestaShop\PrestaShop\Adapter\Product\PriceFormatter;
 
-class HooksWhosaler extends Module
+class HooksWholesaler extends Module
 {
 
     public function hookActionPresentCart($params){        

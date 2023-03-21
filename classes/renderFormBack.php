@@ -35,6 +35,7 @@ class RenderFormBack extends Module
      */
     public function getConfigFormValues()
     {
+        $this->displayConfirmation($this->trans('The settings have been updated.', [], 'Admin.Notifications.Success'));
         return array(
             'WHOLESALERMODULE_MINIMUM_PURCHASE' => Configuration::get('WHOLESALERMODULE_MINIMUM_PURCHASE'),
         );

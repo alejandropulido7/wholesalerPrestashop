@@ -25,12 +25,11 @@
 */
 
 use PrestaShop\PrestaShop\Core\Module\WidgetInterface;
-use PrestaShop\PrestaShop\Adapter\Product\PriceFormatter;
 
 require_once(dirname(__FILE__) . '/classes/renderFormBack.php');
 require_once(dirname(__FILE__) . '/classes/renderListBack.php');
-require_once(dirname(__FILE__) . '/classes/widgetWhosaler.php');
-require_once(dirname(__FILE__) . '/classes/hooksWhosaler.php');
+require_once(dirname(__FILE__) . '/widgetWholesaler.php');
+require_once(dirname(__FILE__) . '/classes/hooksWholesaler.php');
 require_once(dirname(__FILE__) . '/sql/install.php');
 require_once(dirname(__FILE__) . '/sql/uninstall.php');
 
@@ -69,9 +68,8 @@ class WholesalerModule extends Module implements WidgetInterface
 
         $this->renderFormBack = new RenderFormBack();
         $this->renderListBack = new RenderListBack();
-        $this->widgetWhosaler = new WidgetWhosaler();
-        $this->widgetWhosaler = new WidgetWhosaler();
-        $this->hooksWhosaler = new HooksWhosaler();
+        $this->widgetWhosaler = new WidgetWholesaler();
+        $this->hooksWhosaler = new HooksWholesaler();
         
     }
 
@@ -162,7 +160,7 @@ class WholesalerModule extends Module implements WidgetInterface
     }
 
     function getWidgetVariables($hookName = null, array $params){
-        $this->widgetWhosaler->getWidgetVariables($hookName, $params);
+       return $this->widgetWhosaler->getWidgetVariables($hookName, $params);
     }
 
 }
