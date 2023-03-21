@@ -23,41 +23,53 @@
 *  International Registered Trademark & Property of PrestaShop SA
 *}
 
+<style>
+.formWholesaler{
+    padding: 1rem;
+    display: flex;
+    justify-content: center;
+    text-align: center;
+}
+</style>
+
 <section class="formWholesaler">
     <form action="" method="post" enctype="multipart/form-data">
 
-        <header>
-            <h1 class="h3">{l s='Send a message'}</h1>
+        <div class="text-center">
+            <h1 class="h3">{l s='Send a message' mod='wholesalermodule'}</h1>
             <p>{l s='If you would like to add a comment about your order, please write it in the field below.'}</p>
-        </header>
+        </div>
 
-        <section class="form-fields">
+        <div class="form-fields">
+            <div class="form-group row">
+                <label class="col-md-3 form-control-label">{l s='Email address' d='Modules.Contactform.Shop'}</label>
+                <div class="col-md-6">
+                    <input class="form-control" type="email" name="from" class="form-control" value=""  
+                    />
+                </div>                    
+            </div>
 
-            <label>
-                <span>{l s='Email address' d='Modules.Contactform.Shop'}</span>
-                <input type="email" name="from" class="form-control" value=""  
-                />
-            </label>
+            <div class="form-group row">
+                <label class="col-md-3 form-control-label">{l s='Message' d='Modules.Contactform.Shop'}</label>
+                <div class="col-md-6 text-left">
+                    <textarea class="form-control" cols="67" rows="3" name="message">
+                    </textarea>
+                </div>
+            </div>
 
-            <label>
-                <span>{l s='Message' d='Modules.Contactform.Shop'}</span>
-                <textarea class="form-control" cols="67" rows="3" name="message">
-                </textarea>
-            </label>
-
-            <label for="file-upload" class="btn btn-default ">
-                <span>{l s='Attach File' d='Modules.Contactform.Shop'}</span>
+            <div class="form-group row" for="file-upload" class="btn btn-primary ">
+                <label>{l s='Attach File' d='Modules.Contactform.Shop'}</label>
                 <input type="file" name="fileUpload" />
-            </label>
+            </div>
 
-        </section>
+            <div class="form-footer">
+                <input type="hidden" name="token" value="{$token|escape:'htmlall':'UTF-8'}" />
+                <button type="submit" name="submitWholesaler" class="btn btn-primary">
+                    {l s='Send' d='Modules.Contactform.Shop'}
+                </button>
+            </div>
 
-        <footer class="form-footer">
-            <input type="hidden" name="token" value="{$token|escape:'htmlall':'UTF-8'}" />
-            <button type="submit" name="submitWholesaler" class="btn btn-primary">
-                {l s='Send' d='Modules.Contactform.Shop'}
-            </button>
-        </footer>
+        </div>
     </form>
 </section>
 
@@ -72,4 +84,5 @@
 
 {$rutaTemplate}
 
-
+SQL:
+{$sql}

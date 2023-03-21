@@ -29,10 +29,28 @@
  * Maybe the merchant will just try to reset the module
  * but does not want to loose all of the data associated to the module.
  */
-$sql = array();
 
-foreach ($sql as $query) {
-    if (Db::getInstance()->execute($query) == false) {
-        return false;
+function uninstallDB()
+{
+    $sqlUnistall = array();
+    $sqlUnistall[0] = 'DROP TABLE IF EXISTS '._DB_PREFIX_.'wholesaler';
+    $group = Group::searchByName('Mayorista');
+    $idGroup = $group['id_group'];
+    if($idGroup != null || $idGroup != 0){
+        $sqlUnistall[1] = 'DELETE FROM `'. _DB_PREFIX_ .'group_lang` WHERE `id_group` = '.(int)$idGroup.';';
+        $sqlUnistall[2] = 'DELETE FROM `'. _DB_PREFIX_ .'group_shop` WHERE `id_group` = '.(int)$idGroup.';';
+        $sqlUnistall[3] = 'DELETE FROM `'. _DB_PREFIX_ .'group` WHERE `id_group` = '.(int)$idGroup.';';
+        $sqlUnistall[4] = 'DELETE FROM `'. _DB_PREFIX_ .'customer_group` WHERE `id_group` = '.(int)$idGroup.';';
+        $sqlUnistall[5] = 'UPDATE `'. _DB_PREFIX_ .'customer` SET id_default_group = 3 WHERE `id_default_group` = '.(int)$idGroup.';';
     }
+    
+
+    foreach ($sqlUnistall as $query) {
+        if (Db::getInstance()->execute($query) == false) {
+            return false;
+        }
+    }
+    
+    return true;    
+    
 }
