@@ -108,11 +108,27 @@ class WholesalerModule extends Module implements WidgetInterface
             $this->postProcess();
         }
 
+        if (Tools::isSubmit('deletewholesaler')) {
+            $id = (int)Tools::getValue('id_mayorista');
+
+            $sql = 'DELETE FROM `'. _DB_PREFIX_ .'wholesaler` WHERE `id_mayorista` = '.(int)$id.';';
+        
+            if (Db::getInstance()->execute($sql) == false) {
+                return false;
+            }
+        }
+
+        if (Tools::isSubmit('updatewholesaler')) {
+            $id = (int)Tools::getValue('id_mayorista');
+
+            return $this->renderListBack->updateWholesaler($id);
+        }
+
         $this->context->smarty->assign('module_dir', $this->_path);
 
         $output = $this->context->smarty->fetch($this->local_path.'views/templates/admin/configure.tpl');
 
-        return $output.$this->renderFormBack->renderForm($this->name, $this->tab) . $output.$this->renderListBack->renderList();
+        return $output.$this->renderFormBack->renderForm($this->name, $this->tab) . $output.$this->renderListBack->renderListWholesaler($this->name);
 
     }
 

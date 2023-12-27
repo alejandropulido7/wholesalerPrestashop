@@ -102,7 +102,7 @@
         </div>
     </form>
     {if isset($response)}
-        <span>{$response}</span>
+        <div>{$response}</div>
     {/if}
 </section>
 

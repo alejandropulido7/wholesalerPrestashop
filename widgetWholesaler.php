@@ -75,12 +75,16 @@ class WidgetWholesaler extends Module
 
     protected function saveDatabase(array $data){
 
+        $success = false;
+
         $sql = 'INSERT INTO `'. _DB_PREFIX_ .'wholesaler` (`dni_mayorista`, `razon_social`, `telefono`, `email`, `contacto`, `rut`, `camara_comercio`) 
                                                     VALUES ('.$data['dniShop'].', "'.$data['nameShop'].'", "'.$data['cellPhone'].'", "'.$data['emailShop'].'", "'.$data['contactShop'].'", "'.$data['rutShop'].'", "'.$data['commerceShop'].'");';
         
-        if (Db::getInstance()->execute($sql) == false) {
-            return false;
+        if (Db::getInstance()->execute($sql) != false) {
+            $success = true;
         }
+
+        return $success;
     }
 
 

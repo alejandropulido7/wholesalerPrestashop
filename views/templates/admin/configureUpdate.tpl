@@ -23,7 +23,7 @@
 *  International Registered Trademark & Property of PrestaShop SA
 *}
 
-Valor:
-{if isset($values)}
-<div>{$values}</div>
+ID:
+{if isset($data['id_mayorista'])}
+<div>{$data['id_mayorista']}</div>
 {/if}
